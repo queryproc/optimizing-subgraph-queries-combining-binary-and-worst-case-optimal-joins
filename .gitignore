@@ -1,0 +1,17 @@
+.gradle/
+gradlew.bat
+.idea/
+.DS_Store
+build/
+build/*
+out/
+.editorconfig
+generated
+classes
+*.iml
+output/*
+scripts/*/
+!scripts/converter/
+scripts/*.data
+*.data
+.vscode
