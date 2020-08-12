@@ -16,7 +16,6 @@ import ca.waterloo.dsg.graphflow.util.IOUtils;
 import ca.waterloo.dsg.graphflow.util.container.Triple;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.var;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -270,5 +269,9 @@ public class Plan implements Serializable {
      */
     public Plan copy() {
         return copy(false);
+    }
+
+    public Plan copyCatalogPlan() {
+        return new Plan(scanSampling.copy());
     }
 }

@@ -9,11 +9,11 @@ import ca.waterloo.dsg.graphflow.plan.operator.sink.Sink;
 import ca.waterloo.dsg.graphflow.planner.catalog.operator.IntersectCatalog;
 import ca.waterloo.dsg.graphflow.planner.catalog.operator.Noop;
 import ca.waterloo.dsg.graphflow.query.QueryGraph;
+import ca.waterloo.dsg.graphflow.query.QueryGraphSet;
 import ca.waterloo.dsg.graphflow.storage.Graph;
 import ca.waterloo.dsg.graphflow.storage.KeyStore;
 import ca.waterloo.dsg.graphflow.util.IOUtils;
 import lombok.Setter;
-import lombok.var;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -154,8 +154,8 @@ public class Catalog {
                     if (newNumALDsMatched == 0 || newNumALDsMatched < numALDsMatched) {
                         continue;
                     }
-                    var sampledSelectivity = this.sampledSelectivity.get(i).get(getALDsAsStr(ALDs,
-                        vertexMapping, toType));
+                    var strValue = getALDsAsStr(ALDs, vertexMapping, toType);
+                    var sampledSelectivity = this.sampledSelectivity.get(i).get(strValue);
                     if (newNumALDsMatched > numALDsMatched ||
                             sampledSelectivity < approxSelectivity) {
                         numALDsMatched = newNumALDsMatched;
@@ -220,19 +220,27 @@ public class Catalog {
         isAdjListSortedByType = graph.isAdjListSortedByType();
         sampledIcost = new HashMap<>();
         sampledSelectivity = new HashMap<>();
-        var plans = new CatalogPlans(graph, store, numThreads, numSampledEdges,
-            maxInputNumVertices);
-        setInputSubgraphs(plans.getQueryGraphsToExtend().getQueryGraphSet());
-        addZeroSelectivities(graph, plans);
-
-        var queryPlans = plans.getQueryPlansArrs();
-        for (var i = 0; i < queryPlans.size(); i++) {
-            var queryPlanArr = queryPlans.get(i);
-            init(graph, store, queryPlanArr);
-            execute(queryPlanArr);
-            logOutput(graph, queryPlanArr);
-            queryPlans.set(i, null);
+        inSubgraphs = new ArrayList<>();
+        var plans = new CatalogPlans(graph, store, numSampledEdges, maxInputNumVertices);
+        var queryPlan = new Plan[numThreads];
+        var scans = plans.getScans();
+        var queryGraphsToExtend = new QueryGraphSet();
+        for (var scan : scans) {
+            var noop = new Noop(scan.getOutSubgraph());
+            scan.setNext(noop);
+            noop.setPrev(scan);
+            noop.setOutQVertexToIdxMap(scan.getOutQVertexToIdxMap());
+            plans.setNextOperators(graph, noop, queryGraphsToExtend);
+            queryPlan[0] = new Plan(scan);
+            for (var i = 1; i < numThreads; i++) {
+                queryPlan[i] = queryPlan[0].copyCatalogPlan();
+            }
+            setInputSubgraphs(queryGraphsToExtend.getQueryGraphSet());
+            init(graph, store, queryPlan);
+            execute(queryPlan);
+            logOutput(graph, queryPlan);
         }
+        addZeroSelectivities(graph, plans);
         elapsedTime = IOUtils.getElapsedTimeInMillis(startTime);
         log(filename, numThreads, graph, store.getNextTypeKey(), store.getNextLabelKey());
     }
@@ -489,7 +497,6 @@ public class Catalog {
     }
 
     private void setInputSubgraphs(Set<QueryGraph> inSubgraphs) {
-        this.inSubgraphs = new ArrayList<>();
         for (var inSubgraph : inSubgraphs) {
             var isUnique = true;
             for (var thisInSubgraph : this.inSubgraphs) {

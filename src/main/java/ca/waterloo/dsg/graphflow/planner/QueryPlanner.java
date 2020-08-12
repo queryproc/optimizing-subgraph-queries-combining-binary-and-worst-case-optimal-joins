@@ -14,7 +14,7 @@ import ca.waterloo.dsg.graphflow.query.QueryGraph;
 import ca.waterloo.dsg.graphflow.storage.Graph;
 import ca.waterloo.dsg.graphflow.storage.Graph.Direction;
 import ca.waterloo.dsg.graphflow.util.collection.SetUtils;
-import lombok.var;
+import lombok.Setter;
 import org.antlr.v4.runtime.misc.Pair;
 
 import java.util.ArrayList;
@@ -42,6 +42,7 @@ public class QueryPlanner {
     protected Graph graph;
     protected Catalog catalog;
     boolean hasLimit;
+    @Setter int numThreads;
 
     private int nextHashJoinID = 0;
 
@@ -329,7 +330,7 @@ public class QueryPlanner {
         var currBestQueryPlan = getBestPlan(queryVertices.size(), key);
         if (currBestQueryPlan.getEstimatedICost() > icost) {
             var queryPlan = HashJoin.make(outSubgraph, buildSubplan, probeSubplan,
-                nextHashJoinID++);
+                nextHashJoinID++, numThreads);
             queryPlan.setEstimatedICost(icost);
             queryPlan.setEstimatedNumOutTuples(currBestQueryPlan.getEstimatedNumOutTuples());
             var vertexToNumOutTuples = new HashMap<String, Double>(

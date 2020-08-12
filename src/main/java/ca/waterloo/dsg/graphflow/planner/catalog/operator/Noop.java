@@ -4,7 +4,6 @@ import ca.waterloo.dsg.graphflow.plan.operator.Operator;
 import ca.waterloo.dsg.graphflow.query.QueryGraph;
 import ca.waterloo.dsg.graphflow.storage.Graph;
 import ca.waterloo.dsg.graphflow.storage.KeyStore;
-import lombok.var;
 
 public class Noop extends Operator {
 
@@ -35,5 +34,24 @@ public class Noop extends Operator {
         for (var nextOperator : next) {
             nextOperator.processNewTuple();
         }
+    }
+
+    /**
+     * @see Operator#copy()
+     */
+    @Override
+    public Noop copy() {
+        var copy = new Noop(outSubgraph);
+        if (null != next) {
+            var nextCopy = new Operator[next.length];
+            for (var i = 0; i < next.length; i++) {
+                nextCopy[i] = next[i].copy();
+            }
+            copy.setNext(nextCopy);
+            for (var nextOp : nextCopy) {
+                nextOp.setPrev(copy);
+            }
+        }
+        return copy;
     }
 }

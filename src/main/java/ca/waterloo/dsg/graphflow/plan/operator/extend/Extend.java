@@ -2,15 +2,11 @@ package ca.waterloo.dsg.graphflow.plan.operator.extend;
 
 import ca.waterloo.dsg.graphflow.plan.operator.AdjListDescriptor;
 import ca.waterloo.dsg.graphflow.plan.operator.Operator;
-import ca.waterloo.dsg.graphflow.planner.catalog.Catalog;
 import ca.waterloo.dsg.graphflow.query.QueryGraph;
 import ca.waterloo.dsg.graphflow.storage.Graph;
 import ca.waterloo.dsg.graphflow.storage.Graph.Direction;
 import ca.waterloo.dsg.graphflow.storage.KeyStore;
 import ca.waterloo.dsg.graphflow.storage.SortedAdjList;
-import lombok.var;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.io.Serializable;
 import java.util.List;
@@ -47,7 +43,6 @@ public class Extend extends EI implements Serializable {
      */
     @Override
     public void init(int[] probeTuple, Graph graph, KeyStore store) {
-        logger.info("init 1 type: " + toType);
         this.outNeighbours = new Neighbours();
         this.probeTuple = probeTuple;
         this.vertexTypes = graph.getVertexTypes();
@@ -103,7 +98,6 @@ public class Extend extends EI implements Serializable {
      */
     @Override
     public Extend copy(boolean isThreadSafe) {
-        logger.info("copy Extend - toType: " + toType);
         var extend = new Extend(toQueryVertex, toType, ALDs, outSubgraph, inSubgraph,
             outQVertexToIdxMap);
         extend.prev = prev.copy(isThreadSafe);

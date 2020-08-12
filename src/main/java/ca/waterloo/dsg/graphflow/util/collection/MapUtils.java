@@ -1,7 +1,5 @@
 package ca.waterloo.dsg.graphflow.util.collection;
 
-import lombok.var;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

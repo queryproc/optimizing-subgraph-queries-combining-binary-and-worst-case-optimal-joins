@@ -2,7 +2,6 @@ package ca.waterloo.dsg.graphflow.plan.operator.hashjoin;
 
 import ca.waterloo.dsg.graphflow.plan.operator.Operator;
 import ca.waterloo.dsg.graphflow.query.QueryGraph;
-import lombok.var;
 
 import java.io.Serializable;
 import java.util.List;

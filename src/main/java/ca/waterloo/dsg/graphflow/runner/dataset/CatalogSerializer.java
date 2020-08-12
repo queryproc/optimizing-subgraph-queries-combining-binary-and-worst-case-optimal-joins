@@ -8,7 +8,6 @@ import ca.waterloo.dsg.graphflow.storage.Graph;
 import ca.waterloo.dsg.graphflow.storage.GraphFactory;
 import ca.waterloo.dsg.graphflow.storage.KeyStore;
 import ca.waterloo.dsg.graphflow.storage.KeyStoreFactory;
-import lombok.var;
 import org.apache.commons.cli.Options;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,12 +38,12 @@ public class CatalogSerializer extends AbstractRunner {
             Integer.parseInt(cmdLine.getOptionValue(ArgsFactory.NUM_MAX_INPUT_VERTICES)) :
             CatalogPlans.DEF_MAX_INPUT_NUM_VERTICES;
         var numSampledEdges = cmdLine.hasOption(ArgsFactory.NUM_SAMPLED_EDGES) ?
-            Integer.valueOf(cmdLine.getOptionValue(ArgsFactory.NUM_SAMPLED_EDGES)) :
+            Integer.parseInt(cmdLine.getOptionValue(ArgsFactory.NUM_SAMPLED_EDGES)) :
             CatalogPlans.DEF_NUM_EDGES_TO_SAMPLE;
 
         // Run the plans and collect sampled estimates for i-cost and cardinality.
         var numThreads = cmdLine.hasOption(ArgsFactory.NUM_THREADS) ?
-            Integer.valueOf(cmdLine.getOptionValue(ArgsFactory.NUM_THREADS)) : 1 /* default */;
+            Integer.parseInt(cmdLine.getOptionValue(ArgsFactory.NUM_THREADS)) : 1 /* default */;
 
         // Load the data from the given binary directory.
         var inputDirectory = sanitizeDirStr(cmdLine.getOptionValue(ArgsFactory.INPUT_GRAPH_DIR));

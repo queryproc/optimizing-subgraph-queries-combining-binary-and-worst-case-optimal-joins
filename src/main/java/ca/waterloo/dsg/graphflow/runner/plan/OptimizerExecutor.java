@@ -14,7 +14,6 @@ import ca.waterloo.dsg.graphflow.storage.GraphFactory;
 import ca.waterloo.dsg.graphflow.storage.KeyStore;
 import ca.waterloo.dsg.graphflow.storage.KeyStoreFactory;
 import ca.waterloo.dsg.graphflow.util.IOUtils;
-import lombok.var;
 import org.apache.commons.cli.Options;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -67,6 +66,9 @@ public class OptimizerExecutor extends AbstractRunner {
         var planner = queryGraph.getNumVertices() <= 8 ?
             new QueryPlanner(queryGraph, catalog, graph) :
             new QueryPlannerBig(queryGraph, catalog, graph);
+        var numThreads = !cmdLine.hasOption(ArgsFactory.NUM_THREADS) ? 1 /* single thread */ :
+            Integer.parseInt(cmdLine.getOptionValue(ArgsFactory.NUM_THREADS));
+        planner.setNumThreads(numThreads);
         var beginTime = System.nanoTime();
         var queryPlan = planner.plan();
         var elapsedTime = IOUtils.getElapsedTimeInMillis(beginTime);
@@ -76,8 +78,6 @@ public class OptimizerExecutor extends AbstractRunner {
         if (cmdLine.hasOption(ArgsFactory.EXECUTE_PLAN)) {
             beginTime = System.nanoTime();
             // initialize and execute the query transform, get the output metrics and log it.
-            var numThreads = !cmdLine.hasOption(ArgsFactory.NUM_THREADS) ? 1 /* single thread */ :
-                Integer.parseInt(cmdLine.getOptionValue(ArgsFactory.NUM_THREADS));
             var workers = new Workers(queryPlan, numThreads);
             logger.info("Plan initialization before exec run time: " + elapsedTime + " (ms)");
             workers.init(graph, store);

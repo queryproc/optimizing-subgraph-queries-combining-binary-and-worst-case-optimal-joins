@@ -1,6 +1,5 @@
 package ca.waterloo.dsg.graphflow.runner;
 
-import lombok.var;
 import org.apache.commons.cli.Option;
 
 /**

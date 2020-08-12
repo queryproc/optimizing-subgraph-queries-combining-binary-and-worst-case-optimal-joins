@@ -5,7 +5,6 @@ import ca.waterloo.dsg.graphflow.plan.operator.hashjoin.HashTable.BlockInfo;
 import ca.waterloo.dsg.graphflow.query.QueryGraph;
 import ca.waterloo.dsg.graphflow.storage.Graph;
 import ca.waterloo.dsg.graphflow.storage.KeyStore;
-import lombok.var;
 
 import java.io.Serializable;
 import java.util.List;

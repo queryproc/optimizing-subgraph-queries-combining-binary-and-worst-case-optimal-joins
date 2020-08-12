@@ -4,7 +4,6 @@ import ca.waterloo.dsg.graphflow.plan.operator.Operator;
 import ca.waterloo.dsg.graphflow.query.QueryGraph;
 import ca.waterloo.dsg.graphflow.storage.Graph;
 import ca.waterloo.dsg.graphflow.storage.KeyStore;
-import lombok.var;
 
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -96,8 +95,18 @@ public class ScanSampling extends Scan {
      */
     @Override
     public ScanSampling copy() {
-        var scanSampling = new ScanSampling(outSubgraph);
-        scanSampling.edgesQueue = edgesQueue;
-        return scanSampling;
+        var copy = new ScanSampling(outSubgraph);
+        if (null != next) {
+            var nextCopy = new Operator[next.length];
+            for (var i = 0; i < next.length; i++) {
+                nextCopy[i] = next[i].copy();
+            }
+            copy.setNext(nextCopy);
+            for (var nextOp : nextCopy) {
+                nextOp.setPrev(copy);
+            }
+        }
+        copy.edgesQueue = edgesQueue;
+        return copy;
     }
 }

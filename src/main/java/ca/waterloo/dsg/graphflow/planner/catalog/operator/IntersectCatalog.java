@@ -5,8 +5,8 @@ import ca.waterloo.dsg.graphflow.plan.operator.Operator;
 import ca.waterloo.dsg.graphflow.plan.operator.extend.EI;
 import ca.waterloo.dsg.graphflow.plan.operator.extend.Intersect;
 import ca.waterloo.dsg.graphflow.query.QueryGraph;
+import ca.waterloo.dsg.graphflow.storage.Graph;
 import ca.waterloo.dsg.graphflow.storage.KeyStore;
-import lombok.var;
 
 import java.io.Serializable;
 import java.util.List;
@@ -29,6 +29,16 @@ public class IntersectCatalog extends Intersect implements Serializable {
         boolean isAdjListSortedByType) {
         super(toQVertex, toType, ALDs, outSubgraph, inSubgraph, outQVertexToIdxMap);
         this.isAdjListSortedByType = isAdjListSortedByType;
+    }
+
+    /**
+     * @see Operator#init(int[], Graph, KeyStore)
+     */
+    @Override
+    public void init(int[] probeTuple, Graph graph, KeyStore store) {
+        var type = toType;
+        super.init(probeTuple, graph, store);
+        toType = type;
     }
 
     /**
@@ -96,5 +106,25 @@ public class IntersectCatalog extends Intersect implements Serializable {
                 next[vertexTypes[probeTuple[outIdx]]].processNewTuple();
             }
         }
+    }
+
+    /**
+     * @see Operator#copy()
+     */
+    @Override
+    public IntersectCatalog copy() {
+        var copy = new IntersectCatalog(toQueryVertex, toType, ALDs, outSubgraph, inSubgraph,
+            outQVertexToIdxMap, isAdjListSortedByType);
+        if (null != next) {
+            var nextCopy = new Operator[next.length];
+            for (var i = 0; i < next.length; i++) {
+                nextCopy[i] = next[i].copy();
+            }
+            copy.setNext(nextCopy);
+            for (var nextOp : nextCopy) {
+                nextOp.setPrev(copy);
+            }
+        }
+        return copy;
     }
 }

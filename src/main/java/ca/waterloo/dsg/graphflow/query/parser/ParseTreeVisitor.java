@@ -7,7 +7,6 @@ import ca.waterloo.dsg.graphflow.grammar.GraphflowParser.MatchPatternContext;
 import ca.waterloo.dsg.graphflow.query.QueryEdge;
 import ca.waterloo.dsg.graphflow.query.QueryGraph;
 import ca.waterloo.dsg.graphflow.storage.KeyStore;
-import lombok.var;
 
 /**
  * This class implements the ANTLR4 methods used to traverse the parseAntlr tree and return a

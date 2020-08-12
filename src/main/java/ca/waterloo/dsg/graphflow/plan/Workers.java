@@ -10,7 +10,6 @@ import ca.waterloo.dsg.graphflow.storage.KeyStore;
 import ca.waterloo.dsg.graphflow.util.IOUtils;
 import ca.waterloo.dsg.graphflow.util.container.Triple;
 import lombok.Getter;
-import lombok.var;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

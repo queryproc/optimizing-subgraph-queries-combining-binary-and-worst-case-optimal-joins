@@ -1,7 +1,5 @@
 package ca.waterloo.dsg.graphflow.util.collection;
 
-import lombok.var;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;

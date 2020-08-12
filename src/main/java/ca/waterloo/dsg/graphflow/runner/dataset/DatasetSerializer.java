@@ -5,7 +5,6 @@ import ca.waterloo.dsg.graphflow.runner.ArgsFactory;
 import ca.waterloo.dsg.graphflow.storage.Graph;
 import ca.waterloo.dsg.graphflow.storage.GraphFactory;
 import ca.waterloo.dsg.graphflow.storage.KeyStore;
-import lombok.var;
 import org.apache.commons.cli.Options;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

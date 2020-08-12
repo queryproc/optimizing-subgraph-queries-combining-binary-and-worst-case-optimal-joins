@@ -4,7 +4,6 @@ import ca.waterloo.dsg.graphflow.plan.operator.AdjListDescriptor;
 import ca.waterloo.dsg.graphflow.plan.operator.Operator;
 import ca.waterloo.dsg.graphflow.query.QueryGraph;
 import ca.waterloo.dsg.graphflow.storage.KeyStore;
-import lombok.var;
 
 import java.io.Serializable;
 import java.util.List;

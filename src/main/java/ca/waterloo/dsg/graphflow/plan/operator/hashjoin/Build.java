@@ -6,7 +6,6 @@ import ca.waterloo.dsg.graphflow.storage.Graph;
 import ca.waterloo.dsg.graphflow.storage.KeyStore;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.var;
 
 import java.io.Serializable;
 
@@ -58,11 +57,6 @@ public class Build extends Operator implements Serializable {
     public void processNewTuple() {
         hashTable.insertTuple(probeTuple);
     }
-
-    /**
-     * @see Operator#setDataflowsDescriptors()
-     */
-    public void setDataflowsDescriptors() {}
 
     /**
      * @see Operator#isSameAs(Operator)

@@ -7,7 +7,6 @@ import ca.waterloo.dsg.graphflow.storage.KeyStore;
 import ca.waterloo.dsg.graphflow.storage.SortedAdjList;
 import ca.waterloo.dsg.graphflow.util.collection.MapUtils;
 import lombok.Getter;
-import lombok.var;
 
 import java.io.Serializable;
 import java.util.HashMap;

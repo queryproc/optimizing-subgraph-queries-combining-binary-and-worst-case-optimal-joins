@@ -3,7 +3,6 @@ package ca.waterloo.dsg.graphflow.planner.catalog;
 import ca.waterloo.dsg.graphflow.query.QueryGraph;
 import ca.waterloo.dsg.graphflow.storage.Graph;
 import ca.waterloo.dsg.graphflow.util.IOUtils;
-import lombok.var;
 
 import java.io.IOException;
 import java.util.List;

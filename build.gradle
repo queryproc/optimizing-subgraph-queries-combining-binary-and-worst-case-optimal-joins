@@ -16,8 +16,7 @@ dependencies {
     compile group: 'commons-cli', name: 'commons-cli', version: '1.4'
     compile 'org.apache.logging.log4j:log4j-api:2.8.2'
     compile 'org.apache.logging.log4j:log4j-core:2.8.2'
-    compile 'org.projectlombok:lombok:1.18.0'
-    compile 'com.google.code.gson:gson:2.8.2'
+    compile 'org.projectlombok:lombok:1.18.12'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.assertj:assertj-core:3.8.0'
@@ -37,8 +36,8 @@ generateGrammarSource {
 sourceSets.main.java.srcDirs += "$buildDir/generated-src/antlr/main"
 
 compileJava {
-    sourceCompatibility = '1.8'
-    targetCompatibility = '1.8'
+    sourceCompatibility = '11'
+    targetCompatibility = '11'
     // Enable additional compile time warnings.
     options.compilerArgs << "-Xlint:all" << "-Xlint:-processing" << "-Xlint:-cast" << "-Xlint:-serial"
     // Enable incremental builds. Disable if giving errors.
@@ -72,7 +71,7 @@ scripts.each() { fileName, className ->
 
 // Define specific gradle version.
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.0.1'
+    gradleVersion = '4.8.1'
 }
 
 task sourceJar(type: Jar) {

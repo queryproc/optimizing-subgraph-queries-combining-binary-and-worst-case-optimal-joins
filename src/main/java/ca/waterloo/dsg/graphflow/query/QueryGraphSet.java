@@ -1,7 +1,5 @@
 package ca.waterloo.dsg.graphflow.query;
 
-import lombok.var;
-
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;

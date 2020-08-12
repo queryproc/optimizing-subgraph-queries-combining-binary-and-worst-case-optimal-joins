@@ -10,7 +10,6 @@ import ca.waterloo.dsg.graphflow.storage.SortedAdjList;
 import ca.waterloo.dsg.graphflow.util.collection.MapUtils;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.var;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,7 +39,7 @@ public abstract class EI extends Operator {
     protected short[] vertexTypes;
 
     @Getter protected short toType;
-    @Getter String toQueryVertex;
+    @Getter protected String toQueryVertex;
     @Getter protected List<AdjListDescriptor> ALDs;
 
     @Setter protected int outIdx;
@@ -130,8 +129,7 @@ public abstract class EI extends Operator {
         for (var nextOperator : next) {
             nextOperator.init(probeTuple, graph, store);
         }
-        if (graph.isAdjListSortedByType()) {
-
+        if (this instanceof Intersect && graph.isAdjListSortedByType()) {
             toType = KeyStore.ANY;
         }
     }
@@ -166,7 +164,7 @@ public abstract class EI extends Operator {
     /**
      * Sets the sorted adjacency lists to intersect for faster lookups.
      */
-    private void setALDsAndAdjLists(Graph graph, int lastRepeatedVertexIdx) {
+    protected void setALDsAndAdjLists(Graph graph, int lastRepeatedVertexIdx) {
         var numCachedALDs = lastVertexIdsIntersected != null ? lastVertexIdsIntersected.length :
             ALDs.size();
         vertexIdxToCache = new int[numCachedALDs];
@@ -200,7 +198,7 @@ public abstract class EI extends Operator {
     /**
      * Initializes the extension data structured used when intersecting.
      */
-    private void initExtensions(Graph graph) {
+    protected void initExtensions(Graph graph) {
         if (cachingType == CachingType.NONE || cachingType == CachingType.FULL_CACHING) {
             outNeighbours = new Neighbours();
             if (1 == ALDs.size()) {

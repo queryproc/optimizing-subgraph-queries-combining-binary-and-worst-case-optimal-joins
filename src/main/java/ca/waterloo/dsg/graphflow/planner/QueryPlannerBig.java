@@ -7,7 +7,6 @@ import ca.waterloo.dsg.graphflow.planner.catalog.Catalog;
 import ca.waterloo.dsg.graphflow.query.QueryEdge;
 import ca.waterloo.dsg.graphflow.query.QueryGraph;
 import ca.waterloo.dsg.graphflow.storage.Graph;
-import lombok.var;
 
 import java.util.ArrayList;
 import java.util.HashMap;
