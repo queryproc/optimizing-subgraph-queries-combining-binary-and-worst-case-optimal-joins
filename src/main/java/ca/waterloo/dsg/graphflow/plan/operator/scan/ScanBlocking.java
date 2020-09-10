@@ -77,7 +77,7 @@ public class ScanBlocking extends Scan {
     public void execute() throws LimitExceededException {
         updateIndicesLimits();
         while (currFromIdx < highestFromIdx - 1 ||
-            (currFromIdx == highestFromIdx - 1 && currToIdx < highestToIdx)) { // - 1
+            (currFromIdx == highestFromIdx - 1 && currToIdx < highestToIdx)) {
             if (currFromIdx == fromIdxLimit) {
                 produceNewEdges(currFromIdx, currToIdx, toIdxLimit);
             } else if (currFromIdx < fromIdxLimit) {
@@ -99,7 +99,7 @@ public class ScanBlocking extends Scan {
         throws LimitExceededException {
         probeTuple[0] = vertexIds[fromIdx];
         for (var toIdx = startToIdx; toIdx < endToIdx; toIdx++) {
-            probeTuple[1] = fwdAdjList[vertexIds[probeTuple[0]]].getNeighbourId(toIdx);
+            probeTuple[1] = fwdAdjList[probeTuple[0]].getNeighbourId(toIdx);
             if (toType == KeyStore.ANY || vertexTypes[probeTuple[1]] == toType) {
                 numOutTuples++;
                 next[0].processNewTuple();
@@ -127,7 +127,8 @@ public class ScanBlocking extends Scan {
                         break;
                     }
                     fromIdxLimit += 1;
-                    toIdxLimit = 0;
+                    toIdxLimit = fwdAdjList[vertexIds[fromIdxLimit]].getLabelOrTypeOffsets()[
+                        labelOrToType];
                 }
             }
             globalVerticesIdxLimits.fromVariableIndexLimit = fromIdxLimit;

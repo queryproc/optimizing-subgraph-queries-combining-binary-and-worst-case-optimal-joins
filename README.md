@@ -29,7 +29,7 @@ After building, run the following command in the project root directory:
 You can now move into the scripts folder to load a dataset and execute queries:
 ```
 cd scripts
-```
+```  
 
 ### Dataset Preperation
 A dataset may consist of two files: (i) a vertex file, where IDs are from 0 to N and each line is of the format (ID,LABEL); and (ii) an edge file where each line is of the format (FROM,TO,LABEL). If the vertex file is omitted, all vertices are assigned the same label. We mainly used datasets from [SNAP](https://snap.stanford.edu/). The `serialize_dataset.py` script lets you load datasets from csv files and serialize them to the appropriate format for quick subsequent loading.
@@ -73,6 +73,12 @@ The query above assigns an arbitrary edge and vertex labels to (a), (b), (c), (a
 When the dataset has labels, assign labels to each vertex and edge as follows:
 ```
 python3 execute_query.py "(a:person)-[friendof]->(b:person), (b:person)-[likes]->(c:movie)" /absolute/path/data
+```
+
+### Requiring More Memory
+Note that the JVM heap by default is allocated a max of 2GB of memory. Changing the JVM heap maximum size can be done by prepending JAVA_OPTS='-Xmx500G' when calling the python scripts:
+```
+JAVA_OPTS='-Xmx500G' python3 serialize_catalog.py /absolute/path/data  
 ```
 
 Contact

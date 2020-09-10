@@ -43,9 +43,9 @@ public class Workers {
      */
     public Workers(Plan queryPlan, int numThreads) {
         queryPlans = new Plan[numThreads];
-        if (numThreads == 1) {
-           queryPlans[0] = queryPlan;
-        } else { // numThreads > 1
+        // if (numThreads == 1) {
+        //   queryPlans[0] = queryPlan.copy(true /* isThreadSafe */);
+        // } else { // numThreads > 1
             for (int i = 0; i < numThreads; i++) {
                 queryPlans[i] = queryPlan.copy(true /* isThreadSafe */);
             }
@@ -74,7 +74,7 @@ public class Workers {
                     }
                 }
             }
-        }
+        // }
     }
 
     public void init(Graph graph, KeyStore store) {
