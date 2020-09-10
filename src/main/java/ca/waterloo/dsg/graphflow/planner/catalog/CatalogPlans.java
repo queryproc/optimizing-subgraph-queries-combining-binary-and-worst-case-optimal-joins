@@ -26,6 +26,7 @@ import java.util.Map;
  * considering all combinations of possible ALDs accounting for edge labelsOrToTypes & types.
  * The stats collected are used to populate the {@link Catalog}.
  */
+// Warning: we do not account for the sparsity of the graph.
 public class CatalogPlans {
 
     /**
@@ -224,7 +225,8 @@ public class CatalogPlans {
                             graph.getNumEdges(fromType, toType, label) /
                                 (double) graph.getNumEdges()));
                         var scan = new ScanSampling(outSubgraph);
-                        if (isAdjListSortedByType && numEdgesToSample < 1) {
+                        if (// isAdjListSortedByType &&
+                            numEdgesToSample < 1) {
                             if (actualNumEdges < 200) {
                                 numEdgesToSample = actualNumEdges;
                             } else {
