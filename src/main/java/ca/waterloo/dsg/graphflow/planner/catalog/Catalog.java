@@ -229,16 +229,16 @@ public class Catalog {
             var noop = new Noop(scan.getOutSubgraph());
             scan.setNext(noop);
             noop.setPrev(scan);
-            noop.setOutQVertexToIdxMap(scan.getOutQVertexToIdxMap());
-            plans.setNextOperators(graph, noop, queryGraphsToExtend);
-            queryPlan[0] = new Plan(scan);
+            noop.setOutQVertexToIdxMap(scan.getOutQVertexToIdxMap());  // 如果没有 type 和 label, 则 OutQVertexToIdxMap=<{"a":0},{"b":1}>
+            plans.setNextOperators(graph, noop, queryGraphsToExtend);  // scan-noop-intersectcatalog-noop-intersctcatalog-..., queryGraphsToExtend里存储查询子图
+            queryPlan[0] = new Plan(scan);  // scan 是 queryPlan 的 samplescan
             for (var i = 1; i < numThreads; i++) {
                 queryPlan[i] = queryPlan[0].copyCatalogPlan();
             }
-            setInputSubgraphs(queryGraphsToExtend.getQueryGraphSet());
-            init(graph, store, queryPlan);
+            setInputSubgraphs(queryGraphsToExtend.getQueryGraphSet());  // 把queryGraphsToExtend里所有querygraph加到this.inSubgraphs里
+            init(graph, store, queryPlan);  // probeTuble 的设立
             execute(queryPlan);
-            logOutput(graph, queryPlan);
+            logOutput(graph, queryPlan);  // logOutput 调用 ddICostAndSelectivity
         }
         addZeroSelectivities(graph, plans);
         elapsedTime = IOUtils.getElapsedTimeInMillis(startTime);
@@ -247,8 +247,8 @@ public class Catalog {
 
     private void init(Graph graph, KeyStore store, Plan[] queryPlanArr) {
         for (var queryPlan : queryPlanArr) {
-            var probeTuple = new int[maxInputNumVertices + 1];
-            queryPlan.getScanSampling().init(probeTuple, graph, store);
+            var probeTuple = new int[maxInputNumVertices + 1];  // 一般是 int[4]
+            queryPlan.getScanSampling().init(probeTuple, graph, store);  // getScanSampling() 得到的是 scan
         }
     }
 
@@ -256,7 +256,7 @@ public class Catalog {
      * Executes the {@link Plan}s.
      */
     public void execute(Plan[] queryPlanArr) throws InterruptedException {
-        if (queryPlanArr.length > 1) {
+        if (queryPlanArr.length > 1) {  // 多线程
             var threads = new Thread[queryPlanArr.length];
             for (var i = 0; i < threads.length; i++) {
                 var sink = queryPlanArr[i].getSink();
@@ -270,7 +270,7 @@ public class Catalog {
             for (var thread : threads) {
                 thread.join();
             }
-        } else {
+        } else {  // 单线程
             var sink = queryPlanArr[0].getSink();
             try { sink.execute(); } catch (LimitExceededException e) {/* nada. */}
         }
@@ -284,7 +284,7 @@ public class Catalog {
         operator = operator.getNext(0); /* first noop */
         var other = new Operator[queryPlanArr.length - 1];
         for (var i = 1; i < queryPlanArr.length; i++) {
-            other[i - 1] = queryPlanArr[i].getSink().previous[0];
+            other[i - 1] = queryPlanArr[i].getSink().previous[0];  // scan
             while (!(other[i - 1] instanceof ScanSampling)) {
                 other[i - 1] = other[i - 1].getPrev();
             }
@@ -293,7 +293,7 @@ public class Catalog {
         if (isAdjListSortedByType) {
             addICostAndSelectivitySortedByType(operator, other, graph.isUndirected());
         } else {
-            addICostAndSelectivity(operator, other, graph.isUndirected());
+            addICostAndSelectivity(operator, other, graph.isUndirected());  // other 里是 noop
         }
     }
 
@@ -332,7 +332,7 @@ public class Catalog {
 
     private void addICostAndSelectivity(Operator operator, Operator[] other, boolean isUndirected) {
         if (operator.getNext()[0] instanceof Sink) {
-            return;
+            return;   // other 应该是 Noop
         }
         var numInputTuples = operator.getNumOutTuples();
         for (var otherOperator : other) {

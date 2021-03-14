@@ -12,7 +12,7 @@ import java.util.Set;
  */
 public class QueryGraphSet {
 
-    private Map<String, List<QueryGraph>> queryGraphs = new LinkedHashMap<>();
+    private Map<String, List<QueryGraph>> queryGraphs = new LinkedHashMap<>();  // <querygraph's encoding, List<querygraph>>
 
     /**
      * @param queryGraph The {@link QueryGraph} to append to the set.

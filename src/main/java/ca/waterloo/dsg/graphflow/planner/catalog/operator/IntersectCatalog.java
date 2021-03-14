@@ -50,7 +50,7 @@ public class IntersectCatalog extends Intersect implements Serializable {
         // intersect the adjacency lists and setAdjListSortOrder the output vertex values.
         adjListsToCache[0][probeTuple[vertexIdxToCache[0]]].setNeighbourIds(
             labelsOrToTypesToCache[0], outNeighbours);
-        icost += outNeighbours.endIdx - outNeighbours.startIdx;
+        icost += outNeighbours.endIdx - outNeighbours.startIdx;  // 有多少项匹配
         } else {
         // intersect the adjacency lists and setAdjListSortOrder the output vertex values.
         Neighbours temp;

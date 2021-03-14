@@ -82,9 +82,9 @@ public class CatalogPlans {
         this.selectivityZero = new ArrayList<>();
         if (store.getNextLabelKey() == 1 && store.getNextTypeKey() == 1 &&
                 graph.getNumEdges() > 1073741823) {
-            scans = generateAllScansForLargeGraph(graph);
+            scans = generateAllScansForLargeGraph(graph); // 这里只有 (a) -> (b) (0,0,0)一个 scan
         } else {
-            scans = generateAllScans(graph);
+            scans = generateAllScans(graph);  // 这里有 (a) -> (b)  但是 (fromtype,totype,label) 有很多
         }
     }
 
@@ -92,14 +92,14 @@ public class CatalogPlans {
         QueryGraphSet queryGraphsToExtend) {
         var inSubgraph = operator.getOutSubgraph();
         if (null != queryGraphsToExtend && !queryGraphsToExtend.contains(inSubgraph)) {
-            queryGraphsToExtend.add(inSubgraph);
+            queryGraphsToExtend.add(inSubgraph);    // 这里 queryGraphsToExtend 加入了 (a) -> (b) (fromtype, totype, label)
         } else if (queryGraphsToExtend != null) {
             return;
         }
 
         var queryVertices = new ArrayList<String>(inSubgraph.getQVertices());
         var descriptors = new ArrayList<Descriptor>();
-        for (var queryVerticesToExtend : SetUtils.getPowerSetExcludingEmptySet(queryVertices)) {
+        for (var queryVerticesToExtend : SetUtils.getPowerSetExcludingEmptySet(queryVertices)) {  // 从 {a, b} 中选顶点做拓展
             for (var ALDs : generateALDs(queryVerticesToExtend, isDirected)) {
                 descriptors.add(new Descriptor(getOutSubgraph(inSubgraph.copy(), ALDs), ALDs));
             }
@@ -118,25 +118,26 @@ public class CatalogPlans {
                                 0 == graph.getNumEdges(fromType, toType, ALD.getLabel())) ||
                             (ALD.getDirection() == Direction.Bwd &&
                                 0 == graph.getNumEdges(toType, fromType, ALD.getLabel()))) {
-                            producesOutput = false;
+                            producesOutput = false;  // 没有这样的边
                             break;
                         }
                     }
                     if (producesOutput) {
+                        // 对于这样的 Totype 和 ALDs, 有这样的边
                         types.add(toType);
                     } else {
-                        selectivityZero.add(new Triple<>(inSubgraph, descriptor.ALDs, toType));
+                        selectivityZero.add(new Triple<>(inSubgraph, descriptor.ALDs, toType)); // 没有这样的边， 就令 0 selectivity
                     }
                 }
                 var outQVertexToIdxMap = new HashMap<>(operator.getOutQVertexToIdxMap());
-                outQVertexToIdxMap.put(toQVertex, outQVertexToIdxMap.size());
+                outQVertexToIdxMap.put(toQVertex, outQVertexToIdxMap.size());  // 添加 {(c,2)}
                 for (var toType : types) {
                     descriptor.outSubgraph.setVertexType(toQVertex, toType);
                     var intersect = new IntersectCatalog(toQVertex, toType, descriptor.ALDs,
                         descriptor.outSubgraph, inSubgraph, outQVertexToIdxMap,
                         isAdjListSortedByType);
                     intersect.initCaching(operator.getLastRepeatedVertexIdx());
-                    nextList.add(intersect);
+                    nextList.add(intersect);  // 添加了 toQuery, toType, ALDs  (一共 descriptors.size() * types 种)
                 }
             }
             next = nextList.toArray(new IntersectCatalog[0]);
@@ -147,8 +148,8 @@ public class CatalogPlans {
                 var outQVertexToIdxMap = new HashMap<>(operator.getPrev().getOutQVertexToIdxMap());
                 outQVertexToIdxMap.put(toQVertex, outQVertexToIdxMap.size());
                 next[i] = new IntersectCatalog(toQVertex, KeyStore.ANY, descriptor.ALDs, descriptor.
-                    outSubgraph, inSubgraph, outQVertexToIdxMap, isAdjListSortedByType);
-                next[i].initCaching(operator.getPrev().getLastRepeatedVertexIdx());
+                    outSubgraph, inSubgraph, outQVertexToIdxMap, isAdjListSortedByType); // 一共 descriptors.size() 种
+                next[i].initCaching(operator.getPrev().getLastRepeatedVertexIdx());  // scan 的 lastrepeatedvertexidx = 0
             }
         }
         setNextPointers(operator, next);
@@ -248,13 +249,13 @@ public class CatalogPlans {
         var edges = new ArrayList<int[]>();
         for (var fromVertex = 0; fromVertex < numVertices; fromVertex++) {
             for (var toVertex : fwdAdjLists[fromVertex].getNeighbourIds()) {
-                edges.add(new int[] { fromVertex, toVertex });
+                edges.add(new int[] { fromVertex, toVertex });  // edges 里是数据库中所有的边
             }
         }
         var outSubgraph = new QueryGraph();
         outSubgraph.addEdge(new QueryEdge("a", "b", (short) 0, (short) 0, (short) 0));
         var scan = new ScanSampling(outSubgraph);
-        scan.setEdgeIndicesToSample(edges, numSampledEdges);
+        scan.setEdgeIndicesToSample(edges, numSampledEdges);  // 从 edges 里 sample 边
         var scans = new ArrayList<ScanSampling>();
         scans.add(scan);
         return scans;

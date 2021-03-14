@@ -123,7 +123,7 @@ public abstract class EI extends Operator {
         this.probeTuple = probeTuple;
         this.cachingType = CachingType.NONE;
         this.vertexTypes = graph.getVertexTypes();
-        initCaching(this.prev.getLastRepeatedVertexIdx());
+        initCaching(this.prev.getLastRepeatedVertexIdx());  // intersectcatalog 调用 super 时, prev 是 noop
         initExtensions(graph);
         setALDsAndAdjLists(graph, this.prev.getLastRepeatedVertexIdx());
         for (var nextOperator : next) {
@@ -187,6 +187,7 @@ public abstract class EI extends Operator {
                     graph.getFwdAdjLists() : graph.getBwdAdjLists();
             } else if (cachingType == CachingType.PARTIAL_CACHING &&
                 ALD.getVertexIdx() > lastRepeatedVertexIdx) {
+                // partial caching 情况下, 多余的存在没有 cache 里的结构内
                 vertexIdx[idx] = ALD.getVertexIdx();
                 labelsOrToTypes[idx] = graph.isAdjListSortedByType() ? toType : ALD.getLabel();
                 adjLists[idx++] = ALD.getDirection() == Direction.Fwd ? graph.getFwdAdjLists() :
@@ -210,7 +211,7 @@ public abstract class EI extends Operator {
             var adjListSize = graph.getLargestAdjListSize(
                 graph.isAdjListSortedByType() ? toType : ALD.getLabel(), ALD.getDirection());
             if (adjListSize > largestAdjListSize) {
-                largestAdjListSize = adjListSize;
+                largestAdjListSize = adjListSize;  // 最大 ALS 的 adjlistsize
             }
         }
         if (cachingType == CachingType.PARTIAL_CACHING) {

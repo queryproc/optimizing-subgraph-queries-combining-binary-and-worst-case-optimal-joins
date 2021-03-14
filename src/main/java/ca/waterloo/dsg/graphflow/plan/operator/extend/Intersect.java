@@ -21,7 +21,7 @@ public class Intersect extends EI implements Serializable {
     protected Intersect(String toQVertex, short toType, List<AdjListDescriptor> ALDs,
         QueryGraph outSubgraph, QueryGraph inSubgraph, Map<String, Integer> outQVertexToIdxMap) {
         super(toQVertex, toType, ALDs, outSubgraph, inSubgraph);
-        this.lastRepeatedVertexIdx = outTupleLen - 2;
+        this.lastRepeatedVertexIdx = outTupleLen - 2;  // outTupleLen = outSubgraph.getNumVertices()
         this.outQVertexToIdxMap = outQVertexToIdxMap;
         this.outIdx = this.outQVertexToIdxMap.get(toQVertex);
     }
