@@ -1,6 +1,8 @@
 package ca.waterloo.dsg.graphflow.plan.operator.sink;
 
 import ca.waterloo.dsg.graphflow.plan.operator.Operator;
+import ca.waterloo.dsg.graphflow.planner.catalog.operator.Noop;
+import ca.waterloo.dsg.graphflow.query.QueryEdge;
 import ca.waterloo.dsg.graphflow.query.QueryGraph;
 import ca.waterloo.dsg.graphflow.storage.Graph;
 import ca.waterloo.dsg.graphflow.storage.KeyStore;
@@ -44,8 +46,17 @@ public class Sink extends Operator {
      */
     public void execute() throws LimitExceededException {
         if (null != previous) {
+            System.out.println("走的是 previous");
+            System.out.println("是不是noop: "+ (previous[0] instanceof Noop));
+
+            System.out.println("Edges:");
+            for(QueryEdge queryedge : previous[0].getOutSubgraph().getEdges()){
+                System.out.println(queryedge.getFromVertex() + queryedge.getToVertex());
+            }
+            System.out.println("\n");
             previous[0].execute();
         } else {
+            System.out.println("是不是noop:"+ (prev instanceof Noop));
             prev.execute();
         }
     }

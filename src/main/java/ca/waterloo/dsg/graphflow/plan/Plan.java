@@ -10,6 +10,7 @@ import ca.waterloo.dsg.graphflow.plan.operator.scan.ScanSampling;
 import ca.waterloo.dsg.graphflow.plan.operator.sink.Sink;
 import ca.waterloo.dsg.graphflow.plan.operator.sink.Sink.SinkType;
 import ca.waterloo.dsg.graphflow.plan.operator.sink.SinkLimit;
+import ca.waterloo.dsg.graphflow.planner.catalog.operator.Noop;
 import ca.waterloo.dsg.graphflow.storage.Graph;
 import ca.waterloo.dsg.graphflow.storage.KeyStore;
 import ca.waterloo.dsg.graphflow.util.IOUtils;
@@ -60,7 +61,21 @@ public class Plan implements Serializable {
         this.scanSampling = scan;
         var lastOperators = new ArrayList<Operator>();
         scan.getLastOperators(lastOperators);
+
+        // 测试 lastoperators 是不是 noop
+        boolean is_lastOperators_is_noop = true;
+        for(int i = 0;i<lastOperators.size();i++){
+            if(!(lastOperators.get(i) instanceof Noop)){
+                is_lastOperators_is_noop = false;
+            }
+        }
+        if(is_lastOperators_is_noop){
+            System.out.println("plan.scan.lastoperator is noops");
+        }
+
         var outSubgraph = lastOperators.get(0).getOutSubgraph();
+        System.out.println("lastOperators.outgraph.numvertex = "+ outSubgraph.getNumVertices());
+        System.out.println("outgraph:　" + outSubgraph.toString());
         sink = new Sink(outSubgraph);
         sink.previous = lastOperators.toArray(new Operator[0]);
         for (var lastOperator : lastOperators) {

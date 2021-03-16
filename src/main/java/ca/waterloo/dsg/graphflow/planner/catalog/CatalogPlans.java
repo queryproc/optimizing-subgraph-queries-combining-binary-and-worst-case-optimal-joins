@@ -82,8 +82,10 @@ public class CatalogPlans {
         this.selectivityZero = new ArrayList<>();
         if (store.getNextLabelKey() == 1 && store.getNextTypeKey() == 1 &&
                 graph.getNumEdges() > 1073741823) {
+            System.out.println("走的是 scansforlargegraph");
             scans = generateAllScansForLargeGraph(graph); // 这里只有 (a) -> (b) (0,0,0)一个 scan
         } else {
+            System.out.println("走的是 generateallscans");
             scans = generateAllScans(graph);  // 这里有 (a) -> (b)  但是 (fromtype,totype,label) 有很多
         }
     }
@@ -99,12 +101,17 @@ public class CatalogPlans {
 
         var queryVertices = new ArrayList<String>(inSubgraph.getQVertices());
         var descriptors = new ArrayList<Descriptor>();
+        System.out.println("\n"+"getPowerSetExcludingEmptySet(queryVertices).length: "+SetUtils.getPowerSetExcludingEmptySet(queryVertices).size());
+        // 期望是 <{a},{b},{a,b}>.size()=3
         for (var queryVerticesToExtend : SetUtils.getPowerSetExcludingEmptySet(queryVertices)) {  // 从 {a, b} 中选顶点做拓展
             for (var ALDs : generateALDs(queryVerticesToExtend, isDirected)) {
                 descriptors.add(new Descriptor(getOutSubgraph(inSubgraph.copy(), ALDs), ALDs));
+                // descriptors 里的 ALD 的 outsubgraph 是 加上 ALD 连接出来的图
             }
         }
+        System.out.println("descriptors.size(): "+descriptors.size()); // 2+2+4=8
         var toQVertex = QUERY_VERTICES[inSubgraph.getNumVertices()];
+        System.out.println("toqvertex: "+toQVertex);
         IntersectCatalog[] next;
         if (isAdjListSortedByType) {
             var nextList = new ArrayList<IntersectCatalog>();
@@ -142,34 +149,64 @@ public class CatalogPlans {
             }
             next = nextList.toArray(new IntersectCatalog[0]);
         } else {
+            System.out.println("走的是isAdjListSortedByType=FALSE");
             next = new IntersectCatalog[descriptors.size()];
             for (var i = 0; i < descriptors.size(); i++) {
                 var descriptor = descriptors.get(i);
+
+                //改了这个
+                System.out.println("alds.vertexidx:");
+                for(int j = 0; j<descriptor.ALDs.size();j++){
+                    System.out.println(descriptor.ALDs.get(j).getVertexIdx());
+                }
+
+
+
                 var outQVertexToIdxMap = new HashMap<>(operator.getPrev().getOutQVertexToIdxMap());
                 outQVertexToIdxMap.put(toQVertex, outQVertexToIdxMap.size());
+                System.out.println("next["+i+"]");
                 next[i] = new IntersectCatalog(toQVertex, KeyStore.ANY, descriptor.ALDs, descriptor.
                     outSubgraph, inSubgraph, outQVertexToIdxMap, isAdjListSortedByType); // 一共 descriptors.size() 种
+                System.out.println(next[i].getName()+"  LastRepeatedVertexIdx: "+next[i].getLastRepeatedVertexIdx());
+
+                //scan's LastRepeatedVertexIdx()=0
+                //System.out.println("scan's LastRepeatedVertexIdx(): " +operator.getPrev().getLastRepeatedVertexIdx());
+
+                System.out.println("ALDs.size(): "+next[i].getALDs().size()); // 看看有多少条 ALD
+
                 next[i].initCaching(operator.getPrev().getLastRepeatedVertexIdx());  // scan 的 lastrepeatedvertexidx = 0
+                // ALDs.size()==1 时, 不给 cachingtype 赋值
+
+                System.out.println("\n");
             }
         }
         setNextPointers(operator, next);
+        // next.size()=3
+        System.out.println("isAdjListSortedByType = "+isAdjListSortedByType);
+
+        //int count=0;
         for (var nextOperator : next) {
             var outSubgraph = nextOperator.getOutSubgraph();
             Noop[] nextNoops;
-            if (isAdjListSortedByType) {
+            if (isAdjListSortedByType) {  // 我觉得这里可能写错了
                 nextNoops = new Noop[1];
             } else {
-                nextNoops = new Noop[numTypes];
+                nextNoops = new Noop[numTypes];  // type 指的是顶点
             }
             setNoops(outSubgraph, toQVertex, nextNoops, nextOperator.getOutQVertexToIdxMap());
             setNextPointers(nextOperator, nextNoops);
+
+
             if (outSubgraph.getNumVertices() <= maxInputNumVertices) {
+                //count++;
                 for (var nextNoop : nextNoops) {
                     nextNoop.setLastRepeatedVertexIdx(nextOperator.getLastRepeatedVertexIdx());
                     setNextOperators(graph, nextNoop, queryGraphsToExtend);
                 }
             }
+
         }
+        //System.out.println("count = "+count);   第一次运行, count 应该是 8
     }
 
     private List<ScanSampling> generateAllScans(Graph graph) {
@@ -183,6 +220,7 @@ public class CatalogPlans {
                 for (short toType = 0; toType < numTypes; toType++) {
                     var edgeKey = Graph.getEdgeKey(fromType, toType, label);
                     var numEdges = graph.getNumEdges(fromType, toType, label);
+                    System.out.println("numEdges = "+numEdges);
                     if (numEdges == 0) {
                         var x = 2;
                     }
@@ -191,6 +229,8 @@ public class CatalogPlans {
                 }
             }
         }
+
+        // 接下来相当于跑了一遍数据库, 并给 keyToEdgesMap 赋值
         for (var fromVertex = 0; fromVertex < numVertices; fromVertex++) {
             var fromType = vertexTypes[fromVertex];
             var offsets = fwdAdjLists[fromVertex].getLabelOrTypeOffsets();
@@ -207,7 +247,7 @@ public class CatalogPlans {
                     }
                     var edgeKey = Graph.getEdgeKey(fromType, toType, label);
                     var currIdx = keyToCurrIdx.get(edgeKey);
-                    keyToCurrIdx.put(edgeKey, currIdx + 2);
+                    keyToCurrIdx.put(edgeKey, currIdx + 2); //虽然映射里加了2, 但值在上一步已经取出, 故仍从 0 开始
                     keyToEdgesMap.get(edgeKey)[currIdx] = fromVertex;
                     keyToEdgesMap.get(edgeKey)[currIdx + 1] = neighbours[toIdx];
                 }
@@ -221,6 +261,7 @@ public class CatalogPlans {
                     outSubgraph.addEdge(new QueryEdge("a", "b", fromType, toType, label));
                     var edgeKey = Graph.getEdgeKey(fromType, toType, label);
                     var actualNumEdges = graph.getNumEdges(fromType, toType, label);
+                    System.out.println("acutualNumEdges = "+actualNumEdges);
                     if (actualNumEdges > 0) {
                         var numEdgesToSample = (int) (numSampledEdges * (
                             graph.getNumEdges(fromType, toType, label) /
@@ -234,6 +275,7 @@ public class CatalogPlans {
                                 numEdgesToSample = 50;
                             }
                         }
+                        System.out.println("numEdgesToSample = "+ numEdgesToSample);
                         scan.setEdgeIndicesToSample(keyToEdgesMap.get(edgeKey), numEdgesToSample);
                         scans.add(scan);
                     }

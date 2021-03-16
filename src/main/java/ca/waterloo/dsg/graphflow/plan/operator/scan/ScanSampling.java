@@ -50,6 +50,7 @@ public class ScanSampling extends Scan {
                 var edge = edgesQueue.remove(); // NoSuchElementException if empty.
                 probeTuple[0] = edge[0];
                 probeTuple[1] = edge[1];
+                //System.out.println(probeTuple[0]+"  "+probeTuple[1]);
                 numOutTuples++;
                 for (var nextOperator : next) {
                     nextOperator.processNewTuple();

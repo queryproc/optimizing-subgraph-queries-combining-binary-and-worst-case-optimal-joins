@@ -12,6 +12,7 @@ import ca.waterloo.dsg.graphflow.query.QueryGraph;
 import ca.waterloo.dsg.graphflow.query.QueryGraphSet;
 import ca.waterloo.dsg.graphflow.storage.Graph;
 import ca.waterloo.dsg.graphflow.storage.KeyStore;
+import ca.waterloo.dsg.graphflow.storage.SortedAdjList;
 import ca.waterloo.dsg.graphflow.util.IOUtils;
 import lombok.Setter;
 import org.apache.logging.log4j.LogManager;
@@ -225,29 +226,63 @@ public class Catalog {
         var queryPlan = new Plan[numThreads];
         var scans = plans.getScans();
         var queryGraphsToExtend = new QueryGraphSet();
+        int scan_number=1;
         for (var scan : scans) {
+            System.out.println("scan.getName: "+scan.getName());  //应该是 scan(a)->(b)
+            System.out.println("This is the "+scan_number+" scan!!");
             var noop = new Noop(scan.getOutSubgraph());
             scan.setNext(noop);
+            // noop 的作用可能是控制不同的type和label
+            System.out.println("scan.getNext().length: "+scan.getNext().length);   // 期望结果是1, 代表一个scan后面的next只有一个noop
             noop.setPrev(scan);
             noop.setOutQVertexToIdxMap(scan.getOutQVertexToIdxMap());  // 如果没有 type 和 label, 则 OutQVertexToIdxMap=<{"a":0},{"b":1}>
+            System.out.println("noop.getOutQVertexToIdxMap().size(): "+noop.getOutQVertexToIdxMap().size());  // 期望是2
             plans.setNextOperators(graph, noop, queryGraphsToExtend);  // scan-noop-intersectcatalog-noop-intersctcatalog-..., queryGraphsToExtend里存储查询子图
+
+            System.out.println("\nsetnextoperators 结束\n");
             queryPlan[0] = new Plan(scan);  // scan 是 queryPlan 的 samplescan
             for (var i = 1; i < numThreads; i++) {
                 queryPlan[i] = queryPlan[0].copyCatalogPlan();
             }
             setInputSubgraphs(queryGraphsToExtend.getQueryGraphSet());  // 把queryGraphsToExtend里所有querygraph加到this.inSubgraphs里
+            System.out.println("inSubgraphs.size() = "+inSubgraphs.size());
+            System.out.println("queryPlan.length = "+queryPlan.length+"\n");
             init(graph, store, queryPlan);  // probeTuble 的设立
+
+            System.out.println("\n");
             execute(queryPlan);
             logOutput(graph, queryPlan);  // logOutput 调用 ddICostAndSelectivity
+            scan_number++;
         }
-        addZeroSelectivities(graph, plans);
+        addZeroSelectivities(graph, plans);  // 一般的数据集, 这句话没有作用
         elapsedTime = IOUtils.getElapsedTimeInMillis(startTime);
         log(filename, numThreads, graph, store.getNextTypeKey(), store.getNextLabelKey());
+
+        int fwd = 0;
+        for(SortedAdjList adjlist : graph.getFwdAdjLists()){
+            if(fwd < adjlist.size()){
+                fwd = adjlist.size();
+
+            }
+        }
+        System.out.println("fwd = "+fwd);
+
+        int bwd = 0;
+        for(SortedAdjList adjlist : graph.getBwdAdjLists()){
+            if(bwd < adjlist.size()){
+                bwd = adjlist.size();
+
+            }
+        }
+        System.out.println("bwd = "+bwd);
+
+
     }
 
     private void init(Graph graph, KeyStore store, Plan[] queryPlanArr) {
         for (var queryPlan : queryPlanArr) {
             var probeTuple = new int[maxInputNumVertices + 1];  // 一般是 int[4]
+             //  System.out.println("probeTuple.length = "+probeTuple.length);  结果是4
             queryPlan.getScanSampling().init(probeTuple, graph, store);  // getScanSampling() 得到的是 scan
         }
     }
@@ -271,6 +306,7 @@ public class Catalog {
                 thread.join();
             }
         } else {  // 单线程
+            System.out.println("单线程");
             var sink = queryPlanArr[0].getSink();
             try { sink.execute(); } catch (LimitExceededException e) {/* nada. */}
         }
@@ -293,6 +329,7 @@ public class Catalog {
         if (isAdjListSortedByType) {
             addICostAndSelectivitySortedByType(operator, other, graph.isUndirected());
         } else {
+            System.out.println("logoutput 时走的时 isadjlistsortedbytype = false");
             addICostAndSelectivity(operator, other, graph.isUndirected());  // other 里是 noop
         }
     }
@@ -366,6 +403,8 @@ public class Catalog {
                 ALDsAsStrList.add(ALDsStr);
             }
             if (1 == ALDs.size()) {
+
+                // 只有一个 ALD 时, 才放入 sampledIcost
                 var icost = next[i].getIcost();
                 for (var otherOperator : other) {
                     icost += otherOperator.getNext(i).getIcost();

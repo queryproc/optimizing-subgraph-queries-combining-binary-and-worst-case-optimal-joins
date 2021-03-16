@@ -22,8 +22,10 @@ public class Intersect extends EI implements Serializable {
         QueryGraph outSubgraph, QueryGraph inSubgraph, Map<String, Integer> outQVertexToIdxMap) {
         super(toQVertex, toType, ALDs, outSubgraph, inSubgraph);
         this.lastRepeatedVertexIdx = outTupleLen - 2;  // outTupleLen = outSubgraph.getNumVertices()
+        System.out.println("this.lastRepeatedVertexIdx = "+ this.lastRepeatedVertexIdx);
         this.outQVertexToIdxMap = outQVertexToIdxMap;
-        this.outIdx = this.outQVertexToIdxMap.get(toQVertex);
+        this.outIdx = this.outQVertexToIdxMap.get(toQVertex);  // 要连接的点的id
+        System.out.println("outIdx = "+this.outIdx);
     }
 
     /**

@@ -66,11 +66,11 @@ public class SortedAdjList implements Serializable {
     public int intersect(short labelOrType, Neighbours someNeighbours, Neighbours neighbours) {
         intersect(someNeighbours, neighbours, neighbourIds,
             labelOrTypeOffsets[labelOrType], labelOrTypeOffsets[labelOrType + 1]);
-        return labelOrTypeOffsets[labelOrType + 1] - labelOrTypeOffsets[labelOrType];
+        return labelOrTypeOffsets[labelOrType + 1] - labelOrTypeOffsets[labelOrType];  // 只需要取一次, 改变了结构也没有关系
     }
 
     private void intersect(Neighbours someNeighbours, Neighbours neighbours, int[] neighbourIds,
-        int thisIdx, int thisIdxEnd) {
+        int thisIdx, int thisIdxEnd) {  // 没有type时, thisIdx 从 0 开始
         neighbours.reset();
         var someNeighbourIds = someNeighbours.Ids;
         var someIdx = someNeighbours.startIdx;

@@ -46,11 +46,12 @@ public class IntersectCatalog extends Intersect implements Serializable {
      */
     @Override
     public void processNewTuple() throws LimitExceededException {
+        //System.out.println("process here:\n");
         if (1 == ALDs.size()) {
         // intersect the adjacency lists and setAdjListSortOrder the output vertex values.
         adjListsToCache[0][probeTuple[vertexIdxToCache[0]]].setNeighbourIds(
             labelsOrToTypesToCache[0], outNeighbours);
-        icost += outNeighbours.endIdx - outNeighbours.startIdx;  // 有多少项匹配
+        icost += outNeighbours.endIdx - outNeighbours.startIdx;  // 有多少项匹配, 从 probetuple 出节点出发, type相同
         } else {
         // intersect the adjacency lists and setAdjListSortOrder the output vertex values.
         Neighbours temp;
@@ -60,6 +61,8 @@ public class IntersectCatalog extends Intersect implements Serializable {
             lastIcost = initNeighbours.endIdx - initNeighbours.startIdx;
             lastIcost += adjListsToCache[1][probeTuple[vertexIdxToCache[1]]].intersect(
                 labelsOrToTypesToCache[1], initNeighbours, cachedNeighbours);
+
+            // 如果 tovertex 有 type 限制, 要再扫描一遍, 因为 totype 只有一个, 所以下面不需要再次扫描
             if (toType != KeyStore.ANY) {
                 var currEndIdx = 0;
                 for (var i = cachedNeighbours.startIdx; i < cachedNeighbours.endIdx; i++) {
@@ -69,10 +72,11 @@ public class IntersectCatalog extends Intersect implements Serializable {
                 }
                 cachedNeighbours.endIdx = currEndIdx;
             }
+
             for (var i = 2; i < adjListsToCache.length; i++) {
                 temp = cachedNeighbours;
                 cachedNeighbours = tempNeighbours;
-                tempNeighbours = temp;
+                tempNeighbours = temp;  // temp 和 cached 互换
                 lastIcost += adjListsToCache[i][probeTuple[vertexIdxToCache[i]]].intersect(
                     labelsOrToTypesToCache[i], tempNeighbours, cachedNeighbours);
             }
@@ -95,6 +99,7 @@ public class IntersectCatalog extends Intersect implements Serializable {
                 }
                 break;
         }
+            //System.out.println(this.getName() + "   icost = " + icost);
         }
 
         for (var idx = outNeighbours.startIdx; idx < outNeighbours.endIdx; idx++) {

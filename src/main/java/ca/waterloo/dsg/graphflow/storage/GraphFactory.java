@@ -124,7 +124,7 @@ public class GraphFactory {
                       && store.getNextTypeKey()   > 1; /* at least 2 vertex key types used. */
         if (-1 == graph.getHighestVertexId()) {
             graph.setHighestVertexId(highestVertexId);
-            var vertexIds = new int[graph.getHighestVertexId() + 1];
+            var vertexIds = new int[graph.getHighestVertexId() + 1];  // 因为 csv 里的节点 id 是从 0 开始的
             for (var i = 0; i < graph.getHighestVertexId() + 1; i++) {
                 vertexIds[i] = i;
             }

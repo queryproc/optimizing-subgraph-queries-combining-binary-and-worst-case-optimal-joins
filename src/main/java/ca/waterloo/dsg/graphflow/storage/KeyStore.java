@@ -8,6 +8,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Stores a mapping of {@code String} keys to {@code short} keys and vice versa. Each new
@@ -121,5 +122,22 @@ public class KeyStore {
             "nextTypeKey", nextTypeKey,
             "nextLabelKey", nextLabelKey
         });
+
+
+        // 下面是我自己想看的
+
+        System.out.println("nexttypekey: "+ nextTypeKey);
+        System.out.println("nextlabelkey: "+ nextLabelKey);
+        System.out.println("Any "+ ANY);
+        Set<String> stringkey = stringToShortTypeKeyMap.keySet();
+        for(String string:stringkey){
+            System.out.println(string+"    "+stringToShortTypeKeyMap.get(string));
+        }
+
+        System.out.printf("\n");
+
+
+
     }
+
 }

@@ -123,7 +123,9 @@ public abstract class EI extends Operator {
         this.probeTuple = probeTuple;
         this.cachingType = CachingType.NONE;
         this.vertexTypes = graph.getVertexTypes();
+        System.out.println("\n");
         initCaching(this.prev.getLastRepeatedVertexIdx());  // intersectcatalog 调用 super 时, prev 是 noop
+        System.out.println(this.getName() + " CachingType = "+cachingType);
         initExtensions(graph);
         setALDsAndAdjLists(graph, this.prev.getLastRepeatedVertexIdx());
         for (var nextOperator : next) {
@@ -143,16 +145,19 @@ public abstract class EI extends Operator {
         }
         var numCachedALDs = 0;
         for (var ALD : ALDs) {
+            System.out.println("ALD.getVertexIdx: "+ALD.getVertexIdx()); // 0, 1, 2 这样子
             if (ALD.getVertexIdx() <= lastRepeatedVertexIdx) {
                 numCachedALDs++;
             }
         }
+        System.out.println("lastrepeatedvertexidx = "+lastRepeatedVertexIdx);
+        System.out.println("numCachedALDs: "+numCachedALDs);
         if (numCachedALDs <= 1) {
             return;
         }
         if (numCachedALDs == ALDs.size()) {
             cachingType = CachingType.FULL_CACHING;
-        } else { // numCachedALDs in [2, ALDs.size()[
+        } else { // numCachedALDs in [2, ALDs.size())
             cachingType = CachingType.PARTIAL_CACHING;
         }
         lastVertexIdsIntersected = new int[numCachedALDs];
@@ -167,6 +172,7 @@ public abstract class EI extends Operator {
     protected void setALDsAndAdjLists(Graph graph, int lastRepeatedVertexIdx) {
         var numCachedALDs = lastVertexIdsIntersected != null ? lastVertexIdsIntersected.length :
             ALDs.size();
+        System.out.println("numCachedALDs = " +numCachedALDs);
         vertexIdxToCache = new int[numCachedALDs];
         labelsOrToTypesToCache = new short[numCachedALDs];
         adjListsToCache = new SortedAdjList[numCachedALDs][];
@@ -203,6 +209,8 @@ public abstract class EI extends Operator {
         if (cachingType == CachingType.NONE || cachingType == CachingType.FULL_CACHING) {
             outNeighbours = new Neighbours();
             if (1 == ALDs.size()) {
+                System.out.println("largestAdjListSize = "+
+                        graph.getLargestAdjListSize(graph.isAdjListSortedByType() ? toType : ALDs.get(0).getLabel(), ALDs.get(0).getDirection()));
                 return;
             }
         }
@@ -214,6 +222,7 @@ public abstract class EI extends Operator {
                 largestAdjListSize = adjListSize;  // 最大 ALS 的 adjlistsize
             }
         }
+        System.out.println("largestAdjListSize = "+largestAdjListSize);
         if (cachingType == CachingType.PARTIAL_CACHING) {
             outNeighbours = new Neighbours(largestAdjListSize);
         }

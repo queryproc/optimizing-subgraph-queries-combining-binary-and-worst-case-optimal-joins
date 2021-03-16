@@ -9,6 +9,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * The input graph data stored.
@@ -26,7 +27,7 @@ public class Graph {
     }
 
     // vertex Ids indexed by type and random access to vertex types.
-    @Getter @Setter private int[] vertexIds;
+    @Getter @Setter private int[] vertexIds;  // {0,1,2,...,highestVertexid}
     @Getter @Setter private short[] vertexTypes;
     @Getter @Setter private int[] vertexTypeOffsets;
     // Adjacency lists containing the neighbour vertex IDs sorted by ID.
@@ -218,5 +219,70 @@ public class Graph {
             "fromTypeAndLabelToPercentageMap", fromTypeAndLabelToPercentageMap,
             "isUndirected", isUndirected
         });
+
+        // 自己想看的
+        System.out.println("isundirected="+isUndirected);
+        System.out.println("isAdjListSortedByType="+isAdjListSortedByType);
+        System.out.println("highestVertexId="+highestVertexId);
+
+        Set<Long> longset = edgeKeyToNumEdgesMap.keySet();
+        for(Long longkey : longset){
+            System.out.println(longkey + "    " + edgeKeyToNumEdgesMap.get(longkey));
+        }
+        System.out.println(vertexIds.length);
+        for(int i = 0; i < 5; i++){
+            System.out.println("vertexIds["+i+"]="+vertexIds[i]);
+        }
+
+        System.out.println("vertexTypes:");
+
+        System.out.println(vertexTypes.length);
+        int i;
+        for(i=0; i<5; i++){
+            System.out.println("vertexTypes["+ i +"]=" + vertexTypes[i]);
+        }
+
+        System.out.println("vertexTypeOffsetc:");
+        System.out.println(vertexTypeOffsets.length);
+        for(i=0;i<vertexTypeOffsets.length;i++){
+            System.out.println("vertexTypeoffset["+i+"]="+vertexTypeOffsets[i]);
+        }
+
+        System.out.println("fwdadjlists:");
+        //        System.out.println(fwdAdjLists.length);
+        SortedAdjList adjlisttoprint=fwdAdjLists[0];
+        for(i=0;i<8;i++){
+            System.out.println(adjlisttoprint.getNeighbourIds()[i]);
+        }
+        System.out.println("\n");
+        for(int j=0;j<adjlisttoprint.getLabelOrTypeOffsets().length;j++){
+            System.out.println("adjlistlabelortypeoffsets"+j +"  "+adjlisttoprint.getLabelOrTypeOffsets()[j]);
+        }
+        System.out.println("\n");
+
+        adjlisttoprint = fwdAdjLists[1];
+        for(i=0;i<8;i++){
+            System.out.println(adjlisttoprint.getNeighbourIds()[i]);
+        }
+        System.out.println(fwdAdjLists[1].getLabelOrTypeOffsets().length+"\n");
+        for(int j=0;j<adjlisttoprint.getLabelOrTypeOffsets().length;j++){
+            System.out.println("adjlistlabelortypeoffsets"+j +"  "+adjlisttoprint.getLabelOrTypeOffsets()[j]);
+        }
+        System.out.println("\n");
+
+        System.out.println("bwdadjlists:");
+        adjlisttoprint=bwdAdjLists[0];
+        for(i=0;i<8;i++){
+            System.out.println(adjlisttoprint.getNeighbourIds()[i]);
+        }
+
+        System.out.println("labelAndToTypeToPercentageMap:");
+        for(int j:labelAndToTypeToPercentageMap.keySet()){
+            System.out.println(j);
+            System.out.println(labelAndToTypeToPercentageMap.get(j));
+        }
+
+
+
     }
 }
